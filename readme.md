@@ -2,7 +2,7 @@
 
 Langkah-langkah berikut digunakan untuk melakukan setup Zabbix menggunakan Docker Compose dan melakukan import database secara manual.
 
-## 1. Ubah Permission Folder
+1. Ubah Permission Folder
 
 Pastikan folder saat ini dapat diakses oleh container Docker:
 sudo chmod 777 $(pwd)
