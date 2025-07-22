@@ -60,7 +60,7 @@ services:
 volumes:
   mysql_data:
 
-network:
+networks:
   zabbix_network:
     driver: bridge
     name: zabbix_network
