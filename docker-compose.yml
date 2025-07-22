@@ -18,6 +18,8 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
+    networks:
+      - zabbix_network
 
   zabbix-server:
     image: zabbix/zabbix-server-mysql:alpine-7.0.4
@@ -32,8 +34,10 @@ services:
     depends_on:
       - mysql-zabbix
     ports:
-      - "10051:10051" # Port default Zabbix server (optional)
+      - "10051:10051"
     restart: unless-stopped
+    networks:
+      - zabbix_network
 
   zabbix-web:
     image: zabbix/zabbix-web-nginx-mysql:alpine-7.0.4
@@ -45,11 +49,18 @@ services:
       ZBX_SERVER_HOST: zabbix-server
       PHP_TZ: Asia/Jakarta
     ports:
-      - "9090:8080" # Web UI accessible at http://localhost:9090
+      - "9090:8080"
     depends_on:
       - mysql-zabbix
       - zabbix-server
     restart: unless-stopped
+    networks:
+      - zabbix_network
 
 volumes:
   mysql_data:
+
+network:
+  zabbix_network:
+    driver: bridge
+    name: zabbix_network
