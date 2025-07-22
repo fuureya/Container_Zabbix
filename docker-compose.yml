@@ -1,14 +1,13 @@
-version: "3.8"
-
 services:
   mysql-zabbix:
     image: mysql:5.7
     container_name: mysql-zabbix
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-proot_pass"]
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-proot_pass"]
       interval: 5s
-      retries: 5
-      timeout: 3s
+      retries: 10
+      timeout: 5s
+      start_period: 10s
     environment:
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
@@ -32,7 +31,8 @@ services:
       ZBX_DEBUGLEVEL: 3
       TZ: Asia/Jakarta
     depends_on:
-      - mysql-zabbix
+      mysql-zabbix:
+        condition: service_healthy
     ports:
       - "10051:10051"
     restart: unless-stopped
@@ -51,8 +51,8 @@ services:
     ports:
       - "9090:8080"
     depends_on:
-      - mysql-zabbix
-      - zabbix-server
+      zabbix-server:
+        condition: service_started
     restart: unless-stopped
     networks:
       - zabbix_network
