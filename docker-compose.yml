@@ -21,7 +21,7 @@ services:
       - zabbix_network
 
   zabbix-server:
-    image: zabbix/zabbix-server-mysql:alpine-7.0.4
+    image: zabbix/zabbix-server-mysql:ubuntu-7.0.4
     container_name: zabbix-server
     environment:
       DB_SERVER_HOST: mysql-zabbix
@@ -40,7 +40,7 @@ services:
       - zabbix_network
 
   zabbix-web:
-    image: zabbix/zabbix-web-nginx-mysql:alpine-7.0.4
+    image: zabbix/zabbix-web-nginx-mysql:ubuntu-7.0.4
     container_name: zabbix-web
     environment:
       DB_SERVER_HOST: mysql-zabbix
@@ -64,4 +64,3 @@ networks:
   zabbix_network:
     driver: bridge
     name: zabbix_network
-#
