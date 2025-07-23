@@ -1,14 +1,14 @@
+version: "3.5"
+
 services:
   mysql-server:
     image: mysql:8
     container_name: mysql-server
     environment:
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix_pwd
       MYSQL_ROOT_PASSWORD: root_pwd
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
     networks:
       - zabbix-networks
     restart: unless-stopped
@@ -34,7 +34,6 @@ services:
     container_name: zabbix-web
     depends_on:
       - zabbix-server
-      - mysql-server
     environment:
       DB_SERVER_HOST: mysql-server
       MYSQL_DATABASE: zabbix
@@ -42,15 +41,15 @@ services:
       MYSQL_PASSWORD: zabbix_pwd
       ZBX_SERVER_HOST: zabbix-server
       PHP_TZ: Asia/Jakarta
-    networks:
-      - zabbix-networks
     ports:
       - "8080:8080"
+    networks:
+      - zabbix-networks
     restart: unless-stopped
+
+volumes:
+  mysql-data:
 
 networks:
   zabbix-networks:
     driver: bridge
-
-volumes:
-  mysql-data:
