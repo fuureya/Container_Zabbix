@@ -44,8 +44,8 @@ services:
     networks:
       - zabbix-net
 
-  zabbix-postgresql:
-    contianer_name: zabbix-postgresql
+  zabbix-db:
+    contianer_name: zabbix-db
     image: registry.conarx.tech/containers/postgresql-timescaledb
     environment:
       - POSTGRES_USER=zabbix
