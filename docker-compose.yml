@@ -57,6 +57,16 @@ services:
     networks:
       - zabbix_network
 
+  zabbix-init:
+    image: zabbix/zabbix-server-mysql:ubuntu-7.0.4
+    command: bash -c "zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -h mysql-zabbix -uzabbix -pzabbix_pass zabbix"
+    depends_on:
+      mysql-zabbix:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - zabbix_network
+
 volumes:
   mysql_data:
 
