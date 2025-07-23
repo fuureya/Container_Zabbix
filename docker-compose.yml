@@ -1,13 +1,9 @@
+version: "3.9"
+
 services:
   mysql-zabbix:
     image: mysql:8.0.36
     container_name: mysql-zabbix
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot_pass || exit 1"]
-      interval: 5s
-      retries: 10
-      timeout: 5s
-      start_period: 10s
     environment:
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
@@ -16,7 +12,24 @@ services:
       TZ: Asia/Jakarta
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot_pass || exit 1"]
+      interval: 10s
+      retries: 20
+      timeout: 5s
+      start_period: 30s
     restart: unless-stopped
+    networks:
+      - zabbix_network
+
+  zabbix-init:
+    image: zabbix/zabbix-server-mysql:ubuntu-7.0.4
+    container_name: zabbix-init
+    command: bash -c "zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -hmysql-zabbix -uzabbix -pzabbix_pass zabbix"
+    depends_on:
+      mysql-zabbix:
+        condition: service_healthy
+    restart: "no"
     networks:
       - zabbix_network
 
@@ -33,9 +46,11 @@ services:
     depends_on:
       mysql-zabbix:
         condition: service_healthy
+      zabbix-init:
+        condition: service_completed_successfully
     ports:
       - "10051:10051"
-    # restart: unless-stopped
+    restart: unless-stopped
     networks:
       - zabbix_network
 
@@ -48,22 +63,12 @@ services:
       MYSQL_PASSWORD: zabbix_pass
       ZBX_SERVER_HOST: zabbix-server
       PHP_TZ: Asia/Jakarta
-    ports:
-      - "9090:8080"
     depends_on:
       zabbix-server:
         condition: service_started
+    ports:
+      - "9090:8080"
     restart: unless-stopped
-    networks:
-      - zabbix_network
-
-  zabbix-init:
-    image: zabbix/zabbix-server-mysql:ubuntu-7.0.4
-    command: bash -c "zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -h mysql-zabbix -uzabbix -pzabbix_pass zabbix"
-    depends_on:
-      mysql-zabbix:
-        condition: service_healthy
-    restart: "no"
     networks:
       - zabbix_network
 
