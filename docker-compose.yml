@@ -1,88 +1,49 @@
-version: "3.9"
+version: "3.5"
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
+  mysql-server:
+    image: mysql:8
+    container_name: mysql-server
     environment:
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix_pass
-      MYSQL_ROOT_PASSWORD: root_pass
-      TZ: Asia/Jakarta
-    command:
-      - "--character-set-server=utf8"
-      - "--collation-server=utf8_bin"
-      - "--default-authentication-plugin=mysql_native_password"
+      MYSQL_PASSWORD: zabbix_pwd
+      MYSQL_ROOT_PASSWORD: root_pwd
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot_pass || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
-    networks:
-      - zbx
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
 
   zabbix-server:
-    image: zabbix/zabbix-server-mysql:ubuntu-7.4-latest
+    image: zabbix/zabbix-server-mysql:latest
     container_name: zabbix-server
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql-server
     environment:
-      DB_SERVER_HOST: mysql
+      DB_SERVER_HOST: mysql-server
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix_pass
-      MYSQL_ROOT_PASSWORD: root_pass
-      ZBX_DEBUGLEVEL: 3
-      TZ: Asia/Jakarta
+      MYSQL_PASSWORD: zabbix_pwd
     ports:
       - "10051:10051"
-    volumes:
-      - zabbix_server_data:/var/lib/zabbix
-    networks:
-      - zbx
+    restart: unless-stopped
 
   zabbix-web:
-    image: zabbix/zabbix-web-nginx-mysql:ubuntu-7.4-latest
+    image: zabbix/zabbix-web-nginx-mysql:latest
     container_name: zabbix-web
     depends_on:
-      zabbix-server:
-        condition: service_started
-      mysql:
-        condition: service_healthy
+      - zabbix-server
+      - mysql-server
     environment:
-      DB_SERVER_HOST: mysql
+      DB_SERVER_HOST: mysql-server
       MYSQL_DATABASE: zabbix
       MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix_pass
+      MYSQL_PASSWORD: zabbix_pwd
       ZBX_SERVER_HOST: zabbix-server
       PHP_TZ: Asia/Jakarta
     ports:
-      - "80:8080"
-    networks:
-      - zbx
-
-  zabbix-agent:
-    image: zabbix/zabbix-agent:ubuntu-7.4-latest
-    container_name: zabbix-agent
-    depends_on:
-      zabbix-server:
-        condition: service_started
-    environment:
-      ZBX_SERVER_HOST: zabbix-server
-      ZBX_HOSTNAME: "docker-zabbix-agent"
-      TZ: Asia/Jakarta
-    networks:
-      - zbx
+      - "8080:8080"
+    restart: unless-stopped
 
 volumes:
-  mysql_data:
-  zabbix_server_data:
-
-networks:
-  zbx:
-    driver: bridge
+  mysql-data:
