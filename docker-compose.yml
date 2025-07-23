@@ -15,30 +15,21 @@ services:
       - POSTGRES_USER=zabbix
       - POSTGRES_PASSWORD=dbpassword
     networks:
-      internal:
-      # external:
-      #   ipv4_address: 172.16.10.10
-      #   ipv6_address: 64:ff9b:1::10:10
+      - zabbix-networks
 
   zabbix-frontend:
     image: allworldit/zabbix:latest
     environment:
-      ZABBIX_MODE: frontend
-      ZABBIX_DATABASE_TYPE: postgresql
-      POSTGRES_HOST: postgresql
-      POSTGRES_DATABASE: zabbix
-      POSTGRES_USER: zabbix
-      POSTGRES_PASSWORD: dbpassword
-      # NGINX_SET_REAL_IP_FROM: |
-      #   172.16.0.0/12
-      #   64:ff9b:1::/96
+      - ZABBIX_MODE=frontend
+      - ZABBIX_DATABASE_TYPE=postgresql
+      - POSTGRES_HOST=postgresql
+      - POSTGRES_DATABASE=zabbix
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=dbpassword
     ports:
       - "8080:80"
     networks:
-      internal:
-      # external:
-      #   ipv4_address: 172.16.10.20
-      #   ipv6_address: 64:ff9b:1::10:20
+      - zabbix-networks
 
   zabbix-webservice:
     image: allworldit/zabbix:latest
@@ -48,10 +39,7 @@ services:
       - ZABBIX_MODE=webservice
       - ZABBIX_WEBSERVICE_ALLOWEDIP=zabbix-server
     networks:
-      internal:
-      # external:
-      #   ipv4_address: 172.16.10.30
-      #   ipv6_address: 64:ff9b:1::10:30
+      - zabbix-networks
 
   postgresql:
     image: registry.conarx.tech/containers/postgresql-timescaledb
@@ -62,21 +50,9 @@ services:
     volumes:
       - "./data/postgresql:/var/lib/postgresql/data"
     networks:
-      - internal
+      - zabbix-networks
 
 networks:
-  internal:
+  zabbix-networks:
     driver: bridge
-    # enable_ipv6: true
     internal: true
-  # external:
-  #   driver: bridge
-  #   enable_ipv6: true
-  #   driver_opts:
-  #     com.docker.network.bridge.name: docker1
-  #     com.docker.network.enable_ipv6: "true"
-  #   ipam:
-  #     driver: default
-  #     config:
-  #       - subnet: 172.16.10.0/24
-  #       - subnet: 64:ff9b:1::10:0/112
