@@ -6,6 +6,9 @@ services:
     container_name: mysql-server
     environment:
       MYSQL_ROOT_PASSWORD: root_pwd
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_pwd
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init-db:/docker-entrypoint-initdb.d
