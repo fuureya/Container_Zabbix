@@ -1,6 +1,6 @@
 services:
   zabbix-allinone:
-    image: demisto/zabbix:1.0.0.25682
+    image: demisto/zabbix:1.0.0.92125
     container_name: zabbix
     ports:
       - "8080:80"
