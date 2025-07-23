@@ -1,3 +1,5 @@
+version: "3.5"
+
 services:
   mysql-server:
     image: mysql:8
@@ -9,16 +11,21 @@ services:
       MYSQL_PASSWORD: zabbix_pwd
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./init-db:/docker-entrypoint-initdb.d
     networks:
-      - zabbix-networks
+      - zbx-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_pwd"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     restart: unless-stopped
 
   zabbix-server:
     image: zabbix/zabbix-server-mysql:latest
     container_name: zabbix-server
     depends_on:
-      - mysql-server
+      mysql-server:
+        condition: service_healthy
     environment:
       DB_SERVER_HOST: mysql-server
       MYSQL_DATABASE: zabbix
@@ -27,7 +34,7 @@ services:
     ports:
       - "10051:10051"
     networks:
-      - zabbix-networks
+      - zbx-net
     restart: unless-stopped
 
   zabbix-web:
@@ -45,12 +52,12 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - zabbix-networks
+      - zbx-net
     restart: unless-stopped
 
 volumes:
   mysql-data:
 
 networks:
-  zabbix-networks:
+  zbx-net:
     driver: bridge
