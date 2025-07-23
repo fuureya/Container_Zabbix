@@ -1,7 +1,7 @@
 services:
   zabbix-server:
-    image: allworldit/zabbix:latest
     container_name: zabbix-server
+    image: allworldit/zabbix:latest
     hostname: zabbix-server
     environment:
       - ZABBIX_MODE=server
@@ -14,23 +14,31 @@ services:
       - POSTGRES_USER=zabbix
       - POSTGRES_PASSWORD=dbpassword
     networks:
-      - zabbix-net
+      internal:
+      external:
+        ipv4_address: 172.16.10.10
+        ipv6_address: 64:ff9b:1::10:10
 
   zabbix-frontend:
-    image: allworldit/zabbix:latest
     container_name: zabbix-frontend
+    image: allworldit/zabbix:latest
     environment:
-      - ZABBIX_MODE=frontend
-      - ZABBIX_DATABASE_TYPE=postgresql
-      - POSTGRES_HOST=postgresql
-      - POSTGRES_DATABASE=zabbix
-      - POSTGRES_USER=zabbix
-      - POSTGRES_PASSWORD=dbpassword
-      - NGINX_SET_REAL_IP_FROM=172.16.0.0/12
+      ZABBIX_MODE: frontend
+      ZABBIX_DATABASE_TYPE: postgresql
+      POSTGRES_HOST: postgresql
+      POSTGRES_DATABASE: zabbix
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: dbpassword
+      NGINX_SET_REAL_IP_FROM: |
+        172.16.0.0/12
+        64:ff9b:1::/96
     ports:
       - "8080:80"
     networks:
-      - zabbix-net
+      internal:
+      external:
+        ipv4_address: 172.16.10.20
+        ipv6_address: 64:ff9b:1::10:20
 
   zabbix-webservice:
     container_name: zabbix-webservice
@@ -41,7 +49,10 @@ services:
       - ZABBIX_MODE=webservice
       - ZABBIX_WEBSERVICE_ALLOWEDIP=zabbix-server
     networks:
-      - zabbix-net
+      internal:
+      external:
+        ipv4_address: 172.16.10.30
+        ipv6_address: 64:ff9b:1::10:30
 
   zabbix-postgresql:
     container_name: zabbix-postgresql
@@ -53,8 +64,21 @@ services:
     volumes:
       - "./data/postgresql:/var/lib/postgresql/data"
     networks:
-      - zabbix-net
+      - internal
 
 networks:
-  zabbix-net:
+  internal:
     driver: bridge
+    enable_ipv6: true
+    internal: true
+  external:
+    driver: bridge
+    enable_ipv6: true
+    driver_opts:
+      com.docker.network.bridge.name: docker1
+      com.docker.network.enable_ipv6: "true"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.10.0/24
+        - subnet: 64:ff9b:1::10:0/112
