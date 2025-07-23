@@ -15,7 +15,7 @@ services:
       - POSTGRES_USER=zabbix
       - POSTGRES_PASSWORD=dbpassword
     networks:
-      - zabbix-networks
+      - zabbix-net
 
   zabbix-frontend:
     image: allworldit/zabbix:latest
@@ -26,10 +26,11 @@ services:
       - POSTGRES_DATABASE=zabbix
       - POSTGRES_USER=zabbix
       - POSTGRES_PASSWORD=dbpassword
+      - NGINX_SET_REAL_IP_FROM=172.16.0.0/12
     ports:
       - "8080:80"
     networks:
-      - zabbix-networks
+      - zabbix-net
 
   zabbix-webservice:
     image: allworldit/zabbix:latest
@@ -39,7 +40,7 @@ services:
       - ZABBIX_MODE=webservice
       - ZABBIX_WEBSERVICE_ALLOWEDIP=zabbix-server
     networks:
-      - zabbix-networks
+      - zabbix-net
 
   postgresql:
     image: registry.conarx.tech/containers/postgresql-timescaledb
@@ -50,9 +51,8 @@ services:
     volumes:
       - "./data/postgresql:/var/lib/postgresql/data"
     networks:
-      - zabbix-networks
+      - zabbix-net
 
 networks:
-  zabbix-networks:
+  zabbix-net:
     driver: bridge
-    internal: true
