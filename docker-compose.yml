@@ -1,6 +1,7 @@
+version: "3.9"
+
 services:
   zabbix-server:
-    container_name: zabbix-server
     image: allworldit/zabbix:latest
     hostname: zabbix-server
     environment:
@@ -20,7 +21,6 @@ services:
         ipv6_address: 64:ff9b:1::10:10
 
   zabbix-frontend:
-    container_name: zabbix-frontend
     image: allworldit/zabbix:latest
     environment:
       ZABBIX_MODE: frontend
@@ -41,7 +41,6 @@ services:
         ipv6_address: 64:ff9b:1::10:20
 
   zabbix-webservice:
-    container_name: zabbix-webservice
     image: allworldit/zabbix:latest
     extra_hosts:
       - "zabbix.frontend.example.com:172.16.0.1"
@@ -54,8 +53,7 @@ services:
         ipv4_address: 172.16.10.30
         ipv6_address: 64:ff9b:1::10:30
 
-  zabbix-postgresql:
-    container_name: zabbix-postgresql
+  postgresql:
     image: registry.conarx.tech/containers/postgresql-timescaledb
     environment:
       - POSTGRES_USER=zabbix
