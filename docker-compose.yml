@@ -1,8 +1,6 @@
-version: "3.5"
-
 services:
   zabbix-allinone:
-    image: demisto/zabbix:latest
+    image: demisto/zabbix:1.0.0.25682
     container_name: zabbix
     ports:
       - "8080:80"
